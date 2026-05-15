@@ -120,23 +120,47 @@
     </div>
   </section>
 
-  <!-- ========== SECTION 3: VIDEO ========== -->
-  <section id="video" class="video-section">
-    <div class="section-header" data-aos="fade-up">
-      <p class="section-eyebrow">pesan dariku</p>
-      <h2 class="section-title">Sedikit pesan dariku untukmu 🤍</h2>
-      <p class="section-desc">Duduk sebentar, dan tonton ini ya.</p>
-    </div>
-    <div class="video-card" data-aos="zoom-in" data-aos-duration="900">
-      <video id="birthday-video" controls preload="metadata">
-        <source src="video.mp4" type="video/mp4" />
-        Browser kamu tidak mendukung video HTML5.
-      </video>
-      <div class="video-footer">
-        <span>💌 Spesial untukmu</span>
+  <!-- ========== SECTION 3: SLIDESHOW ========== -->
+<section id="slideshow" class="slideshow-section">
+  <div class="section-header" data-aos="fade-up">
+    <p class="section-eyebrow">momen bersamamu</p>
+    <h2 class="section-title">Kenangan yang Aku Simpan 🤍</h2>
+    <p class="section-desc">Setiap foto menyimpan cerita yang selalu aku kenang.</p>
+  </div>
+
+  <div class="slideshow-wrap" data-aos="fade-up" data-aos-delay="150">
+    <div class="slideshow-stage">
+      <div class="slide active" data-caption="Momen yang selalu aku ingat 🌸">
+        <img src="4.jpg" alt="Foto 4" onerror="this.src='https://picsum.photos/seed/s4/800/500'" />
+      </div>
+      <div class="slide" data-caption="Bersamamu adalah rumah 🤍">
+        <img src="5.jpg" alt="Foto 5" onerror="this.src='https://picsum.photos/seed/s5/800/500'" />
+      </div>
+      <div class="slide" data-caption="Tawa yang paling aku suka 🌷">
+        <img src="6.jpg" alt="Foto 6" onerror="this.src='https://picsum.photos/seed/s6/800/500'" />
+      </div>
+      <div class="slide" data-caption="Hari yang tak terlupakan ✨">
+        <img src="7.jpg" alt="Foto 7" onerror="this.src='https://picsum.photos/seed/s7/800/500'" />
+      </div>
+      <div class="slide" data-caption="Kamu selalu bikin aku tersenyum 😊">
+        <img src="8.jpg" alt="Foto 8" onerror="this.src='https://picsum.photos/seed/s8/800/500'" />
+      </div>
+      <div class="slide" data-caption="Terima kasih sudah ada 💕">
+        <img src="9.jpg" alt="Foto 9" onerror="this.src='https://picsum.photos/seed/s9/800/500'" />
+      </div>
+
+      <button class="slide-btn slide-prev" onclick="changeSlide(-1)">‹</button>
+      <button class="slide-btn slide-next" onclick="changeSlide(1)">›</button>
+
+      <div class="slide-caption-box">
+        <p id="slide-caption">Momen yang selalu aku ingat 🌸</p>
       </div>
     </div>
-  </section>
+
+    <div class="slide-dots" id="slide-dots"></div>
+    <div class="slide-counter"><span id="slide-current">1</span> / <span id="slide-total">6</span></div>
+  </div>
+</section>
 
   <!-- ========== SECTION 4: MUSIC PLAYER ========== -->
   <section id="music" class="music-section">

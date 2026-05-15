@@ -466,3 +466,117 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth' });
   });
 });
+
+/* ============================================================
+   SLIDESHOW — tambahkan ke script.js
+   ============================================================ */
+
+(function () {
+  const slides      = document.querySelectorAll('.slide');
+  const dotsWrap    = document.getElementById('slide-dots');
+  const captionEl   = document.getElementById('slide-caption');
+  const currentEl   = document.getElementById('slide-current');
+  const totalEl     = document.getElementById('slide-total');
+  const stage       = document.querySelector('.slideshow-stage');
+
+  if (!slides.length || !stage) return;
+
+  let current   = 0;
+  let autoTimer = null;
+  let isAnimating = false;
+
+  // Build dots
+  totalEl.textContent = slides.length;
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.classList.add('slide-dot');
+    if (i === 0) dot.classList.add('active');
+    dot.setAttribute('aria-label', `Foto ${i + 1}`);
+    dot.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(dot);
+  });
+
+  function getDots() { return dotsWrap.querySelectorAll('.slide-dot'); }
+
+  function goTo(index, dir) {
+    if (isAnimating || index === current) return;
+    isAnimating = true;
+
+    const direction = dir !== undefined ? dir : (index > current ? 1 : -1);
+    const prev = current;
+    current = (index + slides.length) % slides.length;
+
+    // Exit previous
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add(direction > 0 ? 'exit-left' : 'exit-right');
+
+    // Enter current
+    slides[current].classList.add('active');
+
+    // Update caption with fade
+    if (captionEl) {
+      captionEl.style.opacity = '0';
+      setTimeout(() => {
+        captionEl.textContent = slides[current].dataset.caption || '';
+        captionEl.style.opacity = '1';
+      }, 300);
+    }
+
+    // Update dots & counter
+    getDots().forEach((d, i) => d.classList.toggle('active', i === current));
+    if (currentEl) currentEl.textContent = current + 1;
+
+    // Clean exit class after transition
+    setTimeout(() => {
+      slides[prev].classList.remove('exit-left', 'exit-right');
+      isAnimating = false;
+    }, 800);
+
+    resetAuto();
+  }
+
+  function changeSlide(dir) {
+    goTo(current + dir, dir);
+  }
+
+  // Expose globally so onclick in HTML works
+  window.changeSlide = changeSlide;
+
+  // Auto-advance every 4s
+  function startAuto() {
+    autoTimer = setInterval(() => changeSlide(1), 4000);
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    startAuto();
+  }
+
+  startAuto();
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  stage.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) changeSlide(diff > 0 ? 1 : -1);
+  });
+
+  // Mouse drag swipe
+  let dragStartX = 0;
+  let dragging = false;
+  stage.addEventListener('mousedown', e => { dragStartX = e.clientX; dragging = true; });
+  stage.addEventListener('mouseup', e => {
+    if (!dragging) return;
+    dragging = false;
+    const diff = dragStartX - e.clientX;
+    if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1);
+  });
+  stage.addEventListener('mouseleave', () => { dragging = false; });
+
+  // Keyboard arrow keys (when section in view)
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  changeSlide(-1);
+    if (e.key === 'ArrowRight') changeSlide(1);
+  });
+})();
