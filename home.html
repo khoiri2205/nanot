@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday 🎂</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&family=Satisfy&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ========== AMBIENT AUTOPLAY (BIRU) ========== -->
+  <audio id="ambient-audio" preload="auto" loop>
+    <source src="Gabriella_Fernaldi_-_Biru_-__64_Kbps___1_.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- ========== CLICK TO START OVERLAY ========== -->
+  <div id="start-overlay" class="start-overlay">
+    <div class="start-overlay-inner">
+      <div class="so-petal so-p1"></div>
+      <div class="so-petal so-p2"></div>
+      <div class="so-petal so-p3"></div>
+      <div class="so-petal so-p4"></div>
+      <div class="start-content">
+        <p class="so-eyebrow">✦ ✦ ✦</p>
+        <h2 class="so-title">untuk kamu,<br/><span>naaa</span></h2>
+        <p class="so-sub">Ada sesuatu yang menunggumu di sini</p>
+        <button class="so-btn" onclick="startExperience()">
+          Buka Kejutan ✨
+        </button>
+        <p class="so-music-note">🎵 musik akan diputar otomatis</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CANVAS CONFETTI ========== -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ========== AMBIENT MUSIC BADGE ========== -->
+  <div class="ambient-badge" id="ambient-badge">
+    <div class="amb-disc spinning" id="amb-disc">
+      <span>♪</span>
+    </div>
+    <div class="amb-meta">
+      <p class="amb-title">Biru</p>
+      <p class="amb-artist">Gabriella Fernaldi</p>
+    </div>
+    <button class="amb-btn" id="amb-btn" onclick="toggleAmbient()">⏸</button>
+  </div>
+
+  <!-- ========== SECTION 1: LANDING ========== -->
+  <section id="landing" class="landing-section">
+    <div class="lnd-grain"></div>
+    <div class="lnd-orb lnd-orb-1"></div>
+    <div class="lnd-orb lnd-orb-2"></div>
+    <div class="lnd-orb lnd-orb-3"></div>
+    <div class="petals-container" id="petals"></div>
+
+    <div class="landing-content" data-aos="fade-up" data-aos-duration="1400">
+      <p class="landing-eyebrow">✦ sebuah pesan untukmu ✦</p>
+      <h1 class="landing-title" id="typing-text"></h1>
+      <div class="landing-divider">
+        <span class="div-line"></span>
+        <span class="div-heart">♡</span>
+        <span class="div-line"></span>
+      </div>
+      <button class="btn-surprise" onclick="openSurprise()">
+        <span>Buka Kejutan</span>
+        <span class="btn-emoji">🎁</span>
+      </button>
+    </div>
+
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 2: GALLERY ========== -->
+  <section id="gallery" class="gallery-section">
+    <div class="section-header" data-aos="fade-up">
+      <p class="section-eyebrow">kenangan manis</p>
+      <h2 class="section-title">Foto-Foto Kita 📸</h2>
+      <p class="section-desc">Setiap momen bersamamu adalah halaman favoritku.</p>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="polaroid-card tilt-l" data-aos="fade-up" data-aos-delay="100" onclick="openLightbox('1.jpg', 'Senyummu yang paling aku suka 🌸')">
+        <div class="polaroid-img-wrap">
+          <img src="1.jpg" alt="Photo 1" onerror="this.src='https://picsum.photos/seed/rose1/400/500'" />
+          <div class="polaroid-overlay"><span>Lihat ↗</span></div>
+        </div>
+        <p class="polaroid-caption">Senyummu yang paling aku suka 🌸</p>
+      </div>
+
+      <div class="polaroid-card" data-aos="fade-up" data-aos-delay="200" onclick="openLightbox('2.jpg', 'Hari yang tak terlupakan 🌷')">
+        <div class="polaroid-img-wrap">
+          <img src="2.jpg" alt="Photo 2" onerror="this.src='https://picsum.photos/seed/flower2/400/500'" />
+          <div class="polaroid-overlay"><span>Lihat ↗</span></div>
+        </div>
+        <p class="polaroid-caption">Hari yang tak terlupakan 🌷</p>
+      </div>
+
+      <div class="polaroid-card tilt-r" data-aos="fade-up" data-aos-delay="300" onclick="openLightbox('3.jpg', 'Kamu adalah rumahku 🤍')">
+        <div class="polaroid-img-wrap">
+          <img src="3.jpg" alt="Photo 3" onerror="this.src='https://picsum.photos/seed/garden3/400/500'" />
+          <div class="polaroid-overlay"><span>Lihat ↗</span></div>
+        </div>
+        <p class="polaroid-caption">Kamu adalah rumahku 🤍</p>
+      </div>
+    </div>
+
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+      <div class="lightbox-content" onclick="event.stopPropagation()">
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <img id="lightbox-img" src="" alt="" />
+        <p id="lightbox-caption"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 3: VIDEO ========== -->
+  <section id="video" class="video-section">
+    <div class="section-header" data-aos="fade-up">
+      <p class="section-eyebrow">pesan dariku</p>
+      <h2 class="section-title">Sedikit pesan dariku untukmu 🤍</h2>
+      <p class="section-desc">Duduk sebentar, dan tonton ini ya.</p>
+    </div>
+    <div class="video-card" data-aos="zoom-in" data-aos-duration="900">
+      <video id="birthday-video" controls preload="metadata">
+        <source src="video.mp4" type="video/mp4" />
+        Browser kamu tidak mendukung video HTML5.
+      </video>
+      <div class="video-footer">
+        <span>💌 Spesial untukmu</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 4: MUSIC PLAYER ========== -->
+  <section id="music" class="music-section">
+    <div class="section-header" data-aos="fade-up">
+      <p class="section-eyebrow">lagu kita</p>
+      <h2 class="section-title">Our Song 🎵</h2>
+      <p class="section-desc">Ada satu lagu yang selalu ingatkan aku padamu.</p>
+    </div>
+
+    <div class="music-card" data-aos="fade-up" data-aos-delay="100">
+      <div class="music-vinyl-wrap">
+        <div class="music-vinyl" id="music-disc">
+          <div class="vinyl-r vinyl-r1"></div>
+          <div class="vinyl-r vinyl-r2"></div>
+          <div class="vinyl-r vinyl-r3"></div>
+          <div class="vinyl-r vinyl-r4"></div>
+          <div class="vinyl-center">♪</div>
+        </div>
+      </div>
+
+      <div class="music-right">
+        <h3 class="music-name">Our Song</h3>
+        <p class="music-artist">— untukmu, selalu —</p>
+        <p class="music-quote">"Setiap nada selalu mengingatkanku padamu."</p>
+
+        <audio id="birthday-audio" preload="none">
+          <source src="sssSpotify_com_downloader_1772805914259.mp3" type="audio/mpeg" />
+        </audio>
+
+        <div class="music-progress-section">
+          <div class="music-progress-bar" id="music-progress-bar">
+            <div class="music-progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="music-timestamps">
+            <span id="current-time">0:00</span>
+            <span id="total-time">0:00</span>
+          </div>
+        </div>
+
+        <div class="music-controls">
+          <button class="ctrl-btn" onclick="restartTrack()">⏮</button>
+          <button class="ctrl-btn ctrl-main" id="play-pause-btn" onclick="toggleMusic()">
+            <span id="play-icon">▶</span>
+          </button>
+          <button class="ctrl-btn" onclick="restartTrack()">⏭</button>
+        </div>
+
+        <div class="volume-row">
+          <span>🔈</span>
+          <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.7" oninput="setVolume(this.value)" />
+          <span>🔊</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 5: SURAT ========== -->
+  <section id="letter" class="letter-section">
+    <div class="section-header" data-aos="fade-up">
+      <p class="section-eyebrow">dari aku untuk kamu</p>
+      <h2 class="section-title">Untukmu, dengan sepenuh hati ✉️</h2>
+    </div>
+
+    <div class="envelope-wrap" data-aos="fade-up" data-aos-delay="200">
+      <div class="envelope" id="envelope" onclick="openEnvelope()">
+        <div class="envelope-flap" id="envelope-flap"></div>
+        <div class="envelope-body">
+          <div class="envelope-heart">♡</div>
+          <p class="envelope-hint" id="envelope-hint">Klik untuk membuka</p>
+        </div>
+      </div>
+
+      <div class="letter-content" id="letter-content">
+        <div class="letter-paper">
+          <div class="letter-wax">♡</div>
+          <p class="letter-date">— Hari istimewamu —</p>
+          <p class="letter-greeting">Untuk kamu naaa,</p>
+          <p class="letter-body">Hari ini, bertahun-tahun yang lalu, seseorang yang paling berharga dalam hidupku lahir ke dunia. Dan aku bersyukur setiap hari karena jalan hidupku membawaku bertemu denganmu.</p>
+          <p class="letter-body">Kamu mungkin tidak selalu tahu betapa banyak kamu berarti bagiku. Setiap tawamu, setiap ceritamu, setiap momen kecil yang kita lewati bersama — semuanya menjadi bagian dari memori terindahku.</p>
+          <p class="letter-body">Di hari ulang tahunmu ini, aku hanya ingin kamu tahu: kamu dicintai, kamu dihargai, dan kamu adalah salah satu alasan terbesar aku bersyukur setiap pagi.</p>
+          <p class="letter-body">Semoga hari ini membawamu banyak senyum, semoga tahun ini penuh dengan hal-hal indah yang kamu pantas dapatkan. Dan semoga aku selalu bisa ada di sisimu dalam setiap langkahmu.</p>
+          <p class="letter-sign">Dengan cinta yang tulus,<br /><em>Seseorang yang selalu menyayangimu 🤍</em></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 6: FINAL ========== -->
+  <section id="final" class="final-section">
+    <div class="stars-bg" id="stars-bg"></div>
+    <div class="sparkles-container" id="sparkles"></div>
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+
+    <div class="final-content" data-aos="fade-up">
+      <div class="final-crown">👑</div>
+      <h2 class="final-title">Happy Birthday,<br /><span class="final-name">naaa</span> 🎂</h2>
+      <p class="final-sub">Semoga hari ini dan setiap harinya penuh kebahagiaan.</p>
+      <button class="btn-smile" onclick="showSurpriseModal()">
+        Klik kalau kamu senyum sekarang 😌
+      </button>
+    </div>
+
+    <div class="floating-hearts" id="floating-hearts"></div>
+  </section>
+
+  <!-- ========== SURPRISE MODAL ========== -->
+  <div id="surprise-modal" class="surprise-modal">
+    <div class="surprise-modal-content">
+      <button class="modal-close" onclick="closeSurpriseModal()">✕</button>
+      <div class="modal-deco">✨</div>
+      <img id="modal-photo" src="" alt="" class="modal-photo" />
+      <h3 class="modal-title">Aku tahu kamu senyum sekarang 😊</h3>
+      <p class="modal-text" id="modal-text"></p>
+      <button class="modal-btn" onclick="closeSurpriseModal()">Makasih ya 🤍</button>
+    </div>
+  </div>
+  <div id="modal-backdrop" class="modal-backdrop" onclick="closeSurpriseModal()"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
