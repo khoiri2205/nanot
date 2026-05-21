@@ -79,7 +79,6 @@ function initTyping() {
 
   function type() {
     const fullText = typingLines.join('\n');
-    // Assemble full target up to current line
     const target = typingLines.slice(0, lineIdx + 1).join('\n');
 
     if (!isDeleting) {
@@ -255,12 +254,32 @@ function toggleMusic() {
     birthdayAudio.pause();
     musicDisc.classList.remove('playing');
     playIcon.textContent = '▶';
+    musicPlaying = false;
   } else {
-    birthdayAudio.play().catch(() => {});
-    musicDisc.classList.add('playing');
-    playIcon.textContent = '⏸';
+    if (birthdayAudio.readyState === 0) {
+      birthdayAudio.load();
+    }
+    const playPromise = birthdayAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        musicDisc.classList.add('playing');
+        playIcon.textContent = '⏸';
+        musicPlaying = true;
+      }).catch(() => {
+        setTimeout(() => {
+          birthdayAudio.play().then(() => {
+            musicDisc.classList.add('playing');
+            playIcon.textContent = '⏸';
+            musicPlaying = true;
+          }).catch(() => {});
+        }, 300);
+      });
+    } else {
+      musicDisc.classList.add('playing');
+      playIcon.textContent = '⏸';
+      musicPlaying = true;
+    }
   }
-  musicPlaying = !musicPlaying;
 }
 
 function restartTrack() {
@@ -499,12 +518,13 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   function getDots() { return dotsWrap.querySelectorAll('.slide-dot'); }
 
   function goTo(index, dir) {
-    if (isAnimating || index === current) return;
+    const nextIndex = (index + slides.length) % slides.length;
+    if (isAnimating || nextIndex === current) return;
     isAnimating = true;
 
-    const direction = dir !== undefined ? dir : (index > current ? 1 : -1);
+    const direction = dir !== undefined ? dir : (nextIndex > current ? 1 : -1);
     const prev = current;
-    current = (index + slides.length) % slides.length;
+    current = nextIndex;
 
     // Exit previous
     slides[prev].classList.remove('active');
