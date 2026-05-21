@@ -239,60 +239,84 @@ document.addEventListener('keydown', e => {
 /* ============================================================
    MUSIC PLAYER
    ============================================================ */
-const birthdayAudio = document.getElementById('birthday-audio');
-const musicDisc     = document.getElementById('music-disc');
-const playIcon      = document.getElementById('play-icon');
-const progressFill  = document.getElementById('progress-fill');
-const currentTimeEl = document.getElementById('current-time');
-const totalTimeEl   = document.getElementById('total-time');
-const progressBar   = document.getElementById('music-progress-bar');
-
+let birthdayAudio, musicDisc, playIcon, progressFill, currentTimeEl, totalTimeEl, progressBar;
 let musicPlaying = false;
 
-function toggleMusic() {
-  if (musicPlaying) {
-    birthdayAudio.pause();
+function initMusicPlayer() {
+  birthdayAudio = document.getElementById('birthday-audio');
+  musicDisc     = document.getElementById('music-disc');
+  playIcon      = document.getElementById('play-icon');
+  progressFill  = document.getElementById('progress-fill');
+  currentTimeEl = document.getElementById('current-time');
+  totalTimeEl   = document.getElementById('total-time');
+  progressBar   = document.getElementById('music-progress-bar');
+
+  if (!birthdayAudio) return;
+
+  birthdayAudio.addEventListener('timeupdate', () => {
+    if (!birthdayAudio.duration) return;
+    const pct = (birthdayAudio.currentTime / birthdayAudio.duration) * 100;
+    progressFill.style.width = pct + '%';
+    currentTimeEl.textContent = formatTime(birthdayAudio.currentTime);
+  });
+
+  birthdayAudio.addEventListener('loadedmetadata', () => {
+    totalTimeEl.textContent = formatTime(birthdayAudio.duration);
+  });
+
+  birthdayAudio.addEventListener('ended', () => {
     musicDisc.classList.remove('playing');
     playIcon.textContent = '▶';
     musicPlaying = false;
+    progressFill.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
+  });
+
+  birthdayAudio.addEventListener('pause', () => {
+    // Sync UI jika audio di-pause dari luar (misal tab hidden)
+    if (musicPlaying) {
+      musicDisc.classList.remove('playing');
+      playIcon.textContent = '▶';
+      musicPlaying = false;
+    }
+  });
+
+  birthdayAudio.addEventListener('play', () => {
+    musicDisc.classList.add('playing');
+    playIcon.textContent = '⏸';
+    musicPlaying = true;
+  });
+
+  if (progressBar) {
+    progressBar.addEventListener('click', e => {
+      if (!birthdayAudio.duration) return;
+      const rect = progressBar.getBoundingClientRect();
+      const ratio = (e.clientX - rect.left) / rect.width;
+      birthdayAudio.currentTime = ratio * birthdayAudio.duration;
+    });
+  }
+}
+
+function toggleMusic() {
+  if (!birthdayAudio) return;
+  if (!birthdayAudio.paused) {
+    birthdayAudio.pause();
   } else {
-    if (birthdayAudio.readyState === 0) {
-      birthdayAudio.load();
-    }
-    const playPromise = birthdayAudio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        musicDisc.classList.add('playing');
-        playIcon.textContent = '⏸';
-        musicPlaying = true;
-      }).catch(() => {
-        setTimeout(() => {
-          birthdayAudio.play().then(() => {
-            musicDisc.classList.add('playing');
-            playIcon.textContent = '⏸';
-            musicPlaying = true;
-          }).catch(() => {});
-        }, 300);
-      });
-    } else {
-      musicDisc.classList.add('playing');
-      playIcon.textContent = '⏸';
-      musicPlaying = true;
-    }
+    if (birthdayAudio.readyState === 0) birthdayAudio.load();
+    birthdayAudio.play().catch(() => {
+      setTimeout(() => birthdayAudio.play().catch(() => {}), 300);
+    });
   }
 }
 
 function restartTrack() {
+  if (!birthdayAudio) return;
   birthdayAudio.currentTime = 0;
-  if (!musicPlaying) {
-    birthdayAudio.play().catch(() => {});
-    musicDisc.classList.add('playing');
-    playIcon.textContent = '⏸';
-    musicPlaying = true;
-  }
+  birthdayAudio.play().catch(() => {});
 }
 
 function setVolume(val) {
+  if (!birthdayAudio) return;
   birthdayAudio.volume = parseFloat(val);
 }
 
@@ -301,33 +325,6 @@ function formatTime(sec) {
   const s = Math.floor(sec % 60);
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
-
-birthdayAudio.addEventListener('timeupdate', () => {
-  if (!birthdayAudio.duration) return;
-  const pct = (birthdayAudio.currentTime / birthdayAudio.duration) * 100;
-  progressFill.style.width = pct + '%';
-  currentTimeEl.textContent = formatTime(birthdayAudio.currentTime);
-});
-
-birthdayAudio.addEventListener('loadedmetadata', () => {
-  totalTimeEl.textContent = formatTime(birthdayAudio.duration);
-});
-
-birthdayAudio.addEventListener('ended', () => {
-  musicDisc.classList.remove('playing');
-  playIcon.textContent = '▶';
-  musicPlaying = false;
-  progressFill.style.width = '0%';
-  currentTimeEl.textContent = '0:00';
-});
-
-// Click on progress bar to seek
-progressBar.addEventListener('click', e => {
-  if (!birthdayAudio.duration) return;
-  const rect = progressBar.getBoundingClientRect();
-  const ratio = (e.clientX - rect.left) / rect.width;
-  birthdayAudio.currentTime = ratio * birthdayAudio.duration;
-});
 
 /* ============================================================
    ENVELOPE / LETTER
@@ -490,22 +487,28 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
    SLIDESHOW — tambahkan ke script.js
    ============================================================ */
 
-(function () {
-  const slides      = document.querySelectorAll('.slide');
-  const dotsWrap    = document.getElementById('slide-dots');
-  const captionEl   = document.getElementById('slide-caption');
-  const currentEl   = document.getElementById('slide-current');
-  const totalEl     = document.getElementById('slide-total');
-  const stage       = document.querySelector('.slideshow-stage');
+document.addEventListener('DOMContentLoaded', () => {
+  // Init music player (DOM sudah siap)
+  initMusicPlayer();
+
+  // ============================================================
+  // SLIDESHOW
+  // ============================================================
+  const slides    = document.querySelectorAll('.slide');
+  const dotsWrap  = document.getElementById('slide-dots');
+  const captionEl = document.getElementById('slide-caption');
+  const currentEl = document.getElementById('slide-current');
+  const totalEl   = document.getElementById('slide-total');
+  const stage     = document.querySelector('.slideshow-stage');
 
   if (!slides.length || !stage) return;
 
-  let current   = 0;
-  let autoTimer = null;
+  let current     = 0;
+  let autoTimer   = null;
   let isAnimating = false;
 
   // Build dots
-  totalEl.textContent = slides.length;
+  if (totalEl) totalEl.textContent = slides.length;
   slides.forEach((_, i) => {
     const dot = document.createElement('button');
     dot.classList.add('slide-dot');
@@ -518,7 +521,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   function getDots() { return dotsWrap.querySelectorAll('.slide-dot'); }
 
   function goTo(index, dir) {
-    const nextIndex = (index + slides.length) % slides.length;
+    // Hitung wrap-around DULU sebelum cek apakah sama dengan current
+    const nextIndex = ((index % slides.length) + slides.length) % slides.length;
     if (isAnimating || nextIndex === current) return;
     isAnimating = true;
 
@@ -526,14 +530,14 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const prev = current;
     current = nextIndex;
 
-    // Exit previous
+    // Exit slide sebelumnya
     slides[prev].classList.remove('active');
     slides[prev].classList.add(direction > 0 ? 'exit-left' : 'exit-right');
 
-    // Enter current
+    // Tampilkan slide baru
     slides[current].classList.add('active');
 
-    // Update caption with fade
+    // Update caption dengan fade
     if (captionEl) {
       captionEl.style.opacity = '0';
       setTimeout(() => {
@@ -546,11 +550,11 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     getDots().forEach((d, i) => d.classList.toggle('active', i === current));
     if (currentEl) currentEl.textContent = current + 1;
 
-    // Clean exit class after transition
+    // Bersihkan class exit setelah transisi selesai
     setTimeout(() => {
       slides[prev].classList.remove('exit-left', 'exit-right');
       isAnimating = false;
-    }, 800);
+    }, 850);
 
     resetAuto();
   }
@@ -559,22 +563,20 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     goTo(current + dir, dir);
   }
 
-  // Expose globally so onclick in HTML works
+  // Expose ke global agar onclick di HTML bisa memanggil
   window.changeSlide = changeSlide;
 
-  // Auto-advance every 4s
+  // Auto-advance setiap 4 detik
   function startAuto() {
     autoTimer = setInterval(() => changeSlide(1), 4000);
   }
-
   function resetAuto() {
     clearInterval(autoTimer);
     startAuto();
   }
-
   startAuto();
 
-  // Touch / swipe support
+  // Touch / swipe
   let touchStartX = 0;
   stage.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
   stage.addEventListener('touchend', e => {
@@ -582,9 +584,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (Math.abs(diff) > 40) changeSlide(diff > 0 ? 1 : -1);
   });
 
-  // Mouse drag swipe
+  // Mouse drag
   let dragStartX = 0;
-  let dragging = false;
+  let dragging   = false;
   stage.addEventListener('mousedown', e => { dragStartX = e.clientX; dragging = true; });
   stage.addEventListener('mouseup', e => {
     if (!dragging) return;
@@ -594,9 +596,9 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
   stage.addEventListener('mouseleave', () => { dragging = false; });
 
-  // Keyboard arrow keys (when section in view)
+  // Keyboard
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft')  changeSlide(-1);
     if (e.key === 'ArrowRight') changeSlide(1);
   });
-})();
+});
